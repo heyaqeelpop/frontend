@@ -10,33 +10,154 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as ComparisonRouteImport } from './routes/comparison'
+import { Route as DeadlocksRouteImport } from './routes/deadlocks'
+import { Route as PpoRouteImport } from './routes/ppo'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as SchedulerRouteImport } from './routes/scheduler'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as WorkloadsRouteImport } from './routes/workloads'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparisonRoute = ComparisonRouteImport.update({
+  id: '/comparison',
+  path: '/comparison',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeadlocksRoute = DeadlocksRouteImport.update({
+  id: '/deadlocks',
+  path: '/deadlocks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpoRoute = PpoRouteImport.update({
+  id: '/ppo',
+  path: '/ppo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchedulerRoute = SchedulerRouteImport.update({
+  id: '/scheduler',
+  path: '/scheduler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadsRoute = WorkloadsRouteImport.update({
+  id: '/workloads',
+  path: '/workloads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/comparison': typeof ComparisonRoute
+  '/deadlocks': typeof DeadlocksRoute
+  '/ppo': typeof PpoRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+  '/workloads': typeof WorkloadsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/comparison': typeof ComparisonRoute
+  '/deadlocks': typeof DeadlocksRoute
+  '/ppo': typeof PpoRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+  '/workloads': typeof WorkloadsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/comparison': typeof ComparisonRoute
+  '/deadlocks': typeof DeadlocksRoute
+  '/ppo': typeof PpoRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+  '/workloads': typeof WorkloadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/agents'
+    | '/comparison'
+    | '/deadlocks'
+    | '/ppo'
+    | '/reports'
+    | '/resources'
+    | '/scheduler'
+    | '/settings'
+    | '/workloads'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/agents'
+    | '/comparison'
+    | '/deadlocks'
+    | '/ppo'
+    | '/reports'
+    | '/resources'
+    | '/scheduler'
+    | '/settings'
+    | '/workloads'
+  id:
+    | '__root__'
+    | '/'
+    | '/agents'
+    | '/comparison'
+    | '/deadlocks'
+    | '/ppo'
+    | '/reports'
+    | '/resources'
+    | '/scheduler'
+    | '/settings'
+    | '/workloads'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentsRoute: typeof AgentsRoute
+  ComparisonRoute: typeof ComparisonRoute
+  DeadlocksRoute: typeof DeadlocksRoute
+  PpoRoute: typeof PpoRoute
+  ReportsRoute: typeof ReportsRoute
+  ResourcesRoute: typeof ResourcesRoute
+  SchedulerRoute: typeof SchedulerRoute
+  SettingsRoute: typeof SettingsRoute
+  WorkloadsRoute: typeof WorkloadsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +169,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparison': {
+      id: '/comparison'
+      path: '/comparison'
+      fullPath: '/comparison'
+      preLoaderRoute: typeof ComparisonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deadlocks': {
+      id: '/deadlocks'
+      path: '/deadlocks'
+      fullPath: '/deadlocks'
+      preLoaderRoute: typeof DeadlocksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppo': {
+      id: '/ppo'
+      path: '/ppo'
+      fullPath: '/ppo'
+      preLoaderRoute: typeof PpoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scheduler': {
+      id: '/scheduler'
+      path: '/scheduler'
+      fullPath: '/scheduler'
+      preLoaderRoute: typeof SchedulerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workloads': {
+      id: '/workloads'
+      path: '/workloads'
+      fullPath: '/workloads'
+      preLoaderRoute: typeof WorkloadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentsRoute: AgentsRoute,
+  ComparisonRoute: ComparisonRoute,
+  DeadlocksRoute: DeadlocksRoute,
+  PpoRoute: PpoRoute,
+  ReportsRoute: ReportsRoute,
+  ResourcesRoute: ResourcesRoute,
+  SchedulerRoute: SchedulerRoute,
+  SettingsRoute: SettingsRoute,
+  WorkloadsRoute: WorkloadsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
