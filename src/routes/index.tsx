@@ -24,6 +24,7 @@ import {
   StatusDonut,
   ActivityChart,
   StatusBadge,
+  DataSourceBadge,
 } from "@/components/dashboard-ui";
 import { useResources } from "@/components/resource-provider";
 import { pageMeta } from "@/lib/page-meta";
@@ -43,7 +44,8 @@ export const Route = createFileRoute("/")({
 
 // IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  const { agents, resources, events, simulation, run, tick, config } = useResources();
+  const { agents, resources, events, simulation, run, elapsed, config, dataSource } =
+    useResources();
   const [period, setPeriod] = useState("Last 12 minutes");
   const count = (status: string) => agents.filter((a) => a.status === status).length;
   const download = () => {
@@ -89,14 +91,14 @@ function Index() {
           <span className="text-muted-foreground">
             Active workload <span className="ml-1 font-mono text-foreground">WL-001</span>
           </span>
-          <span className="rounded border border-border px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground">
-            SIMULATED
-          </span>
+          <DataSourceBadge source={dataSource} />
         </div>
         <span className="text-muted-foreground">
           {simulation === "Running"
-            ? `Simulation elapsed · ${tick * 2}s`
-            : "Session overview · demo data"}
+            ? `Simulation elapsed · ${elapsed}s`
+            : dataSource === "live"
+              ? "Session overview · live backend"
+              : "Session overview · demo data"}
         </span>
       </div>
       <div className="mb-5 grid grid-cols-2 gap-4 xl:grid-cols-4">

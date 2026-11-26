@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
+  DataSourceBadge,
   PageHeading,
   Panel,
   Field,
@@ -47,11 +48,12 @@ function Scheduler() {
     resources,
     limit,
     setLimit,
-    tick,
     events,
     workloadVersion,
     config,
     generate,
+    elapsed,
+    dataSource,
   } = useResources();
   const [showEvents, setShowEvents] = useState(true);
   const [workload, setWorkload] = useState("current");
@@ -60,7 +62,7 @@ function Scheduler() {
   const start = () => {
     if (workload === "sample") generate({ ...config, mode: "Sample", count: 5, min: 1 });
     run();
-    toast.success("Frontend simulation started. No backend or model inference.");
+    toast.success("Demo simulation started. The Python backend is not connected.");
   };
   return (
     <>
@@ -69,7 +71,15 @@ function Scheduler() {
         description="Allocate resources and orchestrate agent execution with simulated scheduling."
       >
         <StatusBadge status={simulation} />
+        <DataSourceBadge source={dataSource} />
       </PageHeading>
+      {dataSource !== "live" && (
+        <p className="mb-5 rounded-md border border-warning/20 bg-warning/5 p-3 text-[11px] leading-5 text-warning">
+          Python backend not connected. Runs below are a frontend demo; they do not execute the real
+          scheduling algorithms. Status, time, agents, resources and events will update from backend
+          responses once connected.
+        </p>
+      )}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {algorithms.map((a, i) => (
           <Button
@@ -86,7 +96,11 @@ function Scheduler() {
                 ) : (
                   <Workflow className="text-primary" />
                 )}
-                {a === "PPO v2" ? "PPO AI Scheduler" : a === "Priority" ? "Priority Scheduling" : a}
+                {a === "PPO v2"
+                  ? "PPO Reinforcement Learning"
+                  : a === "Priority"
+                    ? "Priority Scheduling"
+                    : a}
               </span>
               {algorithm === a && <CheckCircle2 className="text-primary" size={14} />}
             </div>
@@ -197,7 +211,7 @@ function Scheduler() {
         />
         <Stat
           label="Elapsed time"
-          value={`${tick * 2}s`}
+          value={`${elapsed}s`}
           icon={<Timer />}
           color="text-warning"
           foot={`${limit}s time limit`}
@@ -212,10 +226,10 @@ function Scheduler() {
         {simulation === "Completed" && (
           <p className="mt-4 text-xs text-success">
             Simulation finished.{" "}
-            {tick * 2 >= limit && progress < 100
+            {elapsed >= limit && progress < 100
               ? "Time limit reached with unfinished agents."
               : "All agents reached a final state."}{" "}
-            Results are simulated.
+            {dataSource === "live" ? "Results from backend." : "Demo results only."}
           </p>
         )}
       </Panel>

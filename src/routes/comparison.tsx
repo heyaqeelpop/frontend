@@ -3,7 +3,14 @@ import { useState } from "react";
 import { Play, Check, Trophy, Info, ChartNoAxesCombined, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { PageHeading, Panel, MetricBarChart, Stat } from "@/components/dashboard-ui";
+import {
+  PageHeading,
+  Panel,
+  MetricBarChart,
+  Stat,
+  DataSourceBadge,
+} from "@/components/dashboard-ui";
+import { useResources } from "@/components/resource-provider";
 import { algorithms, comparison, type Algorithm } from "@/lib/demo";
 import { pageMeta } from "@/lib/page-meta";
 export const Route = createFileRoute("/comparison")({
@@ -27,7 +34,12 @@ function Comparison() {
   const [selected, setSelected] = useState<Algorithm[]>([...algorithms]);
   const [applied, setApplied] = useState<Algorithm[]>([...algorithms]);
   const [ran, setRan] = useState(false);
-  const data = comparison.filter((row) => applied.some((a) => a === row.algorithm));
+  const { comparisonResults } = useResources();
+  // Live backend results replace the historical dataset once they arrive.
+  const source = comparisonResults ? "live" : "historical";
+  const rows = comparisonResults ?? comparison;
+  const filtered = rows.filter((row) => applied.some((a) => a === row.algorithm));
+  const data = filtered.length ? filtered : rows;
   const toggle = (algorithm: Algorithm) =>
     setSelected((current) =>
       current.includes(algorithm)
@@ -35,9 +47,15 @@ function Comparison() {
         : [...current, algorithm],
     );
   const run = () => {
+    if (!comparisonResults) {
+      setApplied([...selected]);
+      setRan(true);
+      toast.success("Historical comparison updated. No live experiment was executed.");
+      return;
+    }
     setApplied([...selected]);
     setRan(true);
-    toast.success("Historical comparison updated. No live experiment was executed.");
+    toast.success("Comparison updated from backend results.");
   };
   return (
     <>
@@ -49,6 +67,7 @@ function Comparison() {
           <Play />
           Run comparison
         </Button>
+        <DataSourceBadge source={source} />
       </PageHeading>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4 border-b pb-5">
         <div className="flex flex-wrap gap-2">
@@ -72,7 +91,9 @@ function Comparison() {
         <Info size={16} className="shrink-0 text-primary" />
         <div>
           <p className="text-xs font-semibold">
-            Historical experimental averages · not live measurements
+            {source === "live"
+              ? "Live backend results"
+              : "Historical experimental averages · not live measurements"}
           </p>
           <p className="mt-1 text-[11px] leading-6 text-muted-foreground">
             {ran
@@ -80,6 +101,20 @@ function Comparison() {
               : "Previewing the provided historical dataset. Run comparison to apply your selection."}{" "}
             These are aggregate averages, not a new simulation or real PPO inference.
           </p>
+          <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-muted-foreground">
+            <li>
+              <span className="text-primary">HISTORICAL</span> · recorded experiment averages (PPO
+              v2 row is a historical version)
+            </li>
+            <li>
+              <span className="text-warning">DEMO</span> · illustrative values elsewhere in the
+              dashboard
+            </li>
+            <li>
+              <span className="text-success">LIVE BACKEND</span> · results from the Python backend ·{" "}
+              {comparisonResults ? "received" : "not connected yet"}
+            </li>
+          </ul>
         </div>
       </div>
       <div className="mb-5 grid gap-4 sm:grid-cols-3">

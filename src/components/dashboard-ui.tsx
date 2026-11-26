@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useResources } from "./resource-provider";
 import { history, type Agent, type AgentStatus } from "@/lib/demo";
+import { dataSourceLabels, type DataSource } from "@/lib/backend-contract";
 
 export function Panel({
   title,
@@ -357,13 +358,11 @@ export function ActivityChart() {
   const { agents } = useResources();
   const finished = agents.filter((a) => a.status === "Completed").length;
   const failed = agents.filter((a) => a.status === "Failed").length;
-  const data = history
-    .slice(-10)
-    .map((row, i) => ({
-      ...row,
-      completed: Math.min(finished, row.completed),
-      failed: i % 4 === 0 ? failed : 0,
-    }));
+  const data = history.slice(-10).map((row, i) => ({
+    ...row,
+    completed: Math.min(finished, row.completed),
+    failed: i % 4 === 0 ? failed : 0,
+  }));
   return (
     <div className="chart-wrap short">
       <ResponsiveContainer width="100%" height="100%">
@@ -697,5 +696,23 @@ function AgentDetail({ agent, onClose }: { agent: Agent; onClose: () => void }) 
         ))}
       </aside>
     </>
+  );
+}
+export function DataSourceBadge({ source }: { source: DataSource }) {
+  const color =
+    source === "live" ? "text-success" : source === "historical" ? "text-primary" : "text-warning";
+  return (
+    <span
+      className={`rounded border border-current/20 px-2 py-1 font-mono text-[9px] ${color}`}
+      title={
+        source === "live"
+          ? "Received from the Python backend"
+          : source === "historical"
+            ? "Recorded results from earlier experiments"
+            : "Illustrative frontend demo data · backend not connected"
+      }
+    >
+      {dataSourceLabels[source]}
+    </span>
   );
 }

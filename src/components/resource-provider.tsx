@@ -9,6 +9,13 @@ import {
   type Algorithm,
   type Configuration,
 } from "@/lib/demo";
+import type {
+  ComparisonResult,
+  DataSource,
+  DeadlockReport,
+  ExperimentResult,
+  SimulationSnapshot,
+} from "@/lib/backend-contract";
 
 function useDemoState() {
   const [config, setConfig] = useState<Configuration>({ ...defaults });
@@ -25,12 +32,45 @@ function useDemoState() {
   const [theme, setTheme] = useState<"Dark" | "Light">("Dark");
   const [workloadVersion, setWorkloadVersion] = useState(1);
   const tickRef = useRef(0);
-  const resources = getResources(agents, config);
+  // Backend-ready slots. They stay empty until the FastAPI backend is connected.
+  const [dataSource, setDataSource] = useState<DataSource>("demo");
+  const [liveSnapshot, setLiveSnapshot] = useState<SimulationSnapshot | null>(null);
+  const [comparisonResults, setComparisonResults] = useState<ComparisonResult[] | null>(null);
+  const [deadlockReport, setDeadlockReport] = useState<DeadlockReport | null>(null);
+  const [experimentResults, setExperimentResults] = useState<ExperimentResult[] | null>(null);
+  const demoResources = getResources(agents, config);
+  const resources = liveSnapshot
+    ? {
+        cpu: liveSnapshot.allocation.cpu,
+        ram: liveSnapshot.allocation.ram,
+        tokens: liveSnapshot.allocation.tokens,
+        cpuPercent: Math.round((liveSnapshot.allocation.cpu / config.cpu) * 100),
+        ramPercent: Math.round((liveSnapshot.allocation.ram / config.ram) * 100),
+        tokenPercent: Math.round((liveSnapshot.allocation.tokens / config.tokens) * 100),
+      }
+    : demoResources;
+  const elapsed = liveSnapshot ? liveSnapshot.time : tick * 2;
+  const applySimulationSnapshot = (snapshot: SimulationSnapshot) => {
+    setLiveSnapshot(snapshot);
+    setDataSource("live");
+    setSimulation(snapshot.status);
+    setAlgorithm(snapshot.algorithm);
+    setAgents((current) =>
+      current.map((a) => {
+        const update = snapshot.agents.find((b) => b.id === a.id);
+        return update ? { ...a, ...update } : a;
+      }),
+    );
+    setEvents(snapshot.events.slice(0, 40));
+  };
+  const applyComparisonResults = (rows: ComparisonResult[]) => setComparisonResults(rows);
+  const applyDeadlockReport = (report: DeadlockReport) => setDeadlockReport(report);
+  const applyExperimentResults = (rows: ExperimentResult[]) => setExperimentResults(rows);
   useEffect(() => {
     document.documentElement.classList.toggle("light", theme === "Light");
   }, [theme]);
   useEffect(() => {
-    if (simulation !== "Running") return;
+    if (simulation !== "Running" || dataSource === "live") return;
     const timer = setInterval(() => {
       tickRef.current += 1;
       const step = tickRef.current;
@@ -49,14 +89,15 @@ function useDemoState() {
       );
     }, 1400 / config.speed);
     return () => clearInterval(timer);
-  }, [simulation, algorithm, config.speed]);
+  }, [simulation, algorithm, config.speed, dataSource]);
   useEffect(() => {
+    if (liveSnapshot) return;
     if (
       simulation === "Running" &&
       (agents.every((a) => a.status === "Completed" || a.status === "Failed") || tick * 2 >= limit)
     )
       setSimulation("Completed");
-  }, [agents, tick, limit, simulation]);
+  }, [agents, tick, limit, simulation, liveSnapshot]);
   useEffect(() => {
     if (!monitoring && simulation !== "Running") return;
     const timer = setInterval(
@@ -159,6 +200,16 @@ function useDemoState() {
     run,
     reset,
     resetAll,
+    elapsed,
+    dataSource,
+    liveSnapshot,
+    comparisonResults,
+    deadlockReport,
+    experimentResults,
+    applySimulationSnapshot,
+    applyComparisonResults,
+    applyDeadlockReport,
+    applyExperimentResults,
   };
 }
 type DemoState = ReturnType<typeof useDemoState>;

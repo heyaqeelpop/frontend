@@ -8,6 +8,7 @@ import {
   UtilizationChart,
   StatusBadge,
   MetricBarChart,
+  DataSourceBadge,
 } from "@/components/dashboard-ui";
 import { useResources } from "@/components/resource-provider";
 import { pageMeta } from "@/lib/page-meta";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/resources")({
   component: Resources,
 });
 function Resources() {
-  const { monitoring, setMonitoring, agents, resources } = useResources();
+  const { monitoring, setMonitoring, agents, resources, dataSource } = useResources();
   const running = agents.filter((a) => a.status === "Running");
   return (
     <>
@@ -41,7 +42,9 @@ function Resources() {
         {monitoring
           ? "Monitoring active · sampling shared resource state"
           : "Monitoring paused · showing last available measurements"}
-        <span className="ml-auto rounded border px-2 py-1 font-mono text-[9px]">SIMULATED</span>
+        <span className="ml-auto">
+          <DataSourceBadge source={dataSource} />
+        </span>
       </div>
       <ResourceOverview large />
       <div className="mt-5 grid gap-5 lg:grid-cols-2">

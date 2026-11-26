@@ -12,7 +12,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeading, Panel, Stat } from "@/components/dashboard-ui";
+import { PageHeading, Panel, Stat, DataSourceBadge } from "@/components/dashboard-ui";
+import { useResources } from "@/components/resource-provider";
 import { pageMeta } from "@/lib/page-meta";
 export const Route = createFileRoute("/deadlocks")({
   head: () =>
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/deadlocks")({
 type Phase = "safe" | "detected" | "recovered";
 function Deadlocks() {
   const [phase, setPhase] = useState<Phase>("safe");
+  // Report from the Python deadlock detector; empty until the backend is connected.
+  const { deadlockReport } = useResources();
   const [events, setEvents] = useState(["Monitor initialized · no circular wait detected"]);
   const recover = () => {
     setPhase("recovered");
@@ -90,8 +93,46 @@ function Deadlocks() {
           </p>
         </div>
         <span className="ml-auto hidden rounded border border-current/20 px-2 py-1 font-mono text-[9px] sm:block">
-          DEMO ONLY
+          DEMO · not connected to Python detector
         </span>
+      </div>
+      <div className="mb-5">
+        <Panel
+          title="Deadlock detector report"
+          subtitle="Results from the Python deadlock detector"
+          action={<DataSourceBadge source={deadlockReport ? "live" : "demo"} />}
+        >
+          {deadlockReport ? (
+            <dl className="grid gap-4 text-xs sm:grid-cols-2 xl:grid-cols-5">
+              {[
+                [
+                  "Detected cycles",
+                  deadlockReport.cycles.length
+                    ? deadlockReport.cycles.map((c) => c.join(" → ")).join(" · ")
+                    : "None",
+                ],
+                ["Involved agents", deadlockReport.agents.join(", ") || "—"],
+                ["Victim agent", deadlockReport.victim ?? "—"],
+                ["Recovery action", deadlockReport.action],
+                [
+                  "Released resources",
+                  `${deadlockReport.released.cpu} CPU · ${deadlockReport.released.ram} GB RAM`,
+                ],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="mt-1 font-mono text-[11px]">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="text-[11px] leading-5 text-muted-foreground">
+              No detector report yet. Detected cycles, involved agents, the selected victim,
+              recovery action, and released CPU and RAM will appear here once the Python backend is
+              connected. The graph below is a DEMO scenario.
+            </p>
+          )}
+        </Panel>
       </div>
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
         <Stat
@@ -118,7 +159,7 @@ function Deadlocks() {
       </div>
       <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
         <Panel
-          title="Wait-for graph"
+          title="Wait-for graph · DEMO"
           subtitle="Directed edges point to the agent holding the requested resource"
           action={
             <span
@@ -208,7 +249,7 @@ function Deadlocks() {
             )}
           </div>
         </Panel>
-        <Panel title="Recovery details" subtitle="Lowest-priority victim selection strategy">
+        <Panel title="Recovery details · DEMO" subtitle="Lowest-priority victim selection strategy">
           <div className="space-y-5 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Recovery victim</span>
@@ -261,7 +302,7 @@ function Deadlocks() {
       </div>
       <div className="mt-5">
         <Panel
-          title="Deadlock event history"
+          title="Deadlock event history · DEMO"
           subtitle="Simulated dependencies, detection, and recovery events"
         >
           <div className="font-mono">

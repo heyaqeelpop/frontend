@@ -17,7 +17,10 @@ import {
   Stat,
   StatusBadge,
   MetricBarChart,
+  DataSourceBadge,
 } from "@/components/dashboard-ui";
+import { useResources } from "@/components/resource-provider";
+import type { ExperimentResult } from "@/lib/backend-contract";
 import { algorithms, reports, toCSV } from "@/lib/demo";
 import { pageMeta } from "@/lib/page-meta";
 export const Route = createFileRoute("/reports")({
@@ -35,7 +38,11 @@ function Reports() {
   const [from, setFrom] = useState("2026-11-01");
   const [to, setTo] = useState("2026-11-25");
   const [view, setView] = useState("Experiments");
-  const filtered = reports.filter(
+  // Actual experiment results from the backend replace the demo history when available.
+  const { experimentResults } = useResources();
+  const source = experimentResults ? "live" : "demo";
+  const rows: ExperimentResult[] = experimentResults ?? reports;
+  const filtered = rows.filter(
     (row) =>
       (algorithm === "All" || row.algorithm === algorithm) &&
       (workload === "All" || row.workload === workload) &&
@@ -80,7 +87,7 @@ function Reports() {
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = `agent-${view.toLowerCase().replaceAll(" ", "-")}-report.csv`;
+    link.download = `agent-${view.toLowerCase().replaceAll(" ", "-")}-${source === "live" ? "results" : "demo"}-report.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -92,8 +99,9 @@ function Reports() {
       >
         <Button variant="outline" disabled={!filtered.length} onClick={exportCSV}>
           <Download />
-          Download CSV
+          {source === "live" ? "Download CSV" : "Download demo CSV"}
         </Button>
+        <DataSourceBadge source={source} />
       </PageHeading>
       <div className="mb-5 grid grid-cols-2 gap-4 xl:grid-cols-4">
         <Stat
