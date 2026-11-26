@@ -11,6 +11,8 @@ import {
   DataSourceBadge,
 } from "@/components/dashboard-ui";
 import { useResources } from "@/components/resource-provider";
+import { latestPpoModel as v5 } from "@/lib/backend-contract";
+const displayName = (a: string) => (a === "PPO v2" ? "PPO V2 (Historical)" : a);
 import { algorithms, comparison, type Algorithm } from "@/lib/demo";
 import { pageMeta } from "@/lib/page-meta";
 export const Route = createFileRoute("/comparison")({
@@ -39,7 +41,10 @@ function Comparison() {
   const source = comparisonResults ? "live" : "historical";
   const rows = comparisonResults ?? comparison;
   const filtered = rows.filter((row) => applied.some((a) => a === row.algorithm));
-  const data = filtered.length ? filtered : rows;
+  const data = (filtered.length ? filtered : rows).map((row) => ({
+    ...row,
+    algorithm: displayName(row.algorithm),
+  }));
   const toggle = (algorithm: Algorithm) =>
     setSelected((current) =>
       current.includes(algorithm)
@@ -79,7 +84,7 @@ function Comparison() {
               onClick={() => toggle(algorithm)}
             >
               {selected.includes(algorithm) && <Check size={12} />}
-              {algorithm}
+              {displayName(algorithm)}
             </Button>
           ))}
         </div>
@@ -116,6 +121,37 @@ function Comparison() {
             </li>
           </ul>
         </div>
+      </div>
+      <div className="mb-5">
+        <Panel
+          title={`${v5.version} evaluation results`}
+          subtitle="Latest trained model · separate experiment from the four-algorithm comparison"
+          action={
+            <span className="rounded border border-violet/20 px-2 py-1 font-mono text-[9px] text-violet">
+              LATEST MODEL
+            </span>
+          }
+        >
+          <dl className="grid gap-4 text-xs sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Evaluation episodes", String(v5.evaluation.episodes)],
+              ["Evaluation seed", v5.evaluation.seed.toLocaleString()],
+              ["Completion rate", `${v5.evaluation.completionRate}%`],
+              ["Mean reward", String(v5.evaluation.meanReward)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd className="mt-1 font-mono text-sm">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 border-t pt-4 text-[11px] leading-5 text-muted-foreground">
+            This {v5.version} evaluation ({v5.evaluation.episodes} episodes, seed{" "}
+            {v5.evaluation.seed.toLocaleString()}) is a different experiment from the historical
+            four-algorithm comparison below, which used PPO V2. The figures are not directly
+            comparable, so {v5.version} is not added to the charts or table.
+          </p>
+        </Panel>
       </div>
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
         <Stat
@@ -183,10 +219,12 @@ function Comparison() {
             </p>
             <p>
               <span className="font-semibold text-primary">Priority has the shortest makespan</span>{" "}
-              at 46.7s, while completing more agents than PPO v2.
+              at 46.7s, while completing more agents than PPO V2 (Historical).
             </p>
             <p>
-              <span className="font-semibold text-violet">PPO v2 consumes fewer tokens</span>{" "}
+              <span className="font-semibold text-violet">
+                PPO V2 (Historical) consumes fewer tokens
+              </span>{" "}
               (5,876), but its 27.5% completion rate is lowest. Less consumption alone does not
               imply a better scheduler.
             </p>

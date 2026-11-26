@@ -63,13 +63,16 @@ function PPO() {
           {
             name: v5.version,
             subtitle: "Latest trained model",
-            agents: "Up to 20 agents",
+            agents: "1–20 agents",
             workload: "Randomized workloads",
             steps: v5.timesteps.toLocaleString(),
             extra: [
               ["Training seed", String(v5.seed)],
               ["Model file", v5.file],
-              ["Evaluation", `${v5.evaluation.episodes} episodes · seed ${v5.evaluation.seed}`],
+              [
+                "Evaluation",
+                `${v5.evaluation.episodes} episodes · seed ${v5.evaluation.seed.toLocaleString()}`,
+              ],
             ],
           },
           {
@@ -108,7 +111,7 @@ function PPO() {
             </div>
             <dl className="space-y-4 text-xs">
               {[
-                ["Agent support", item.agents],
+                ["Supported workload", item.agents],
                 ["Workload type", item.workload],
                 ["Training timesteps", item.steps],
                 ...item.extra,
@@ -145,7 +148,7 @@ function PPO() {
           value={v5.actionSpace}
           icon={<Bot />}
           color="text-cyan"
-          foot={v5.actionDetail}
+          foot="discrete actions"
         />
         <Stat
           label="V5 training timesteps"
@@ -287,20 +290,25 @@ function PPO() {
             <div className="mt-6 space-y-5 text-xs">
               <div className="flex items-center gap-2 text-success">
                 <CheckCircle2 size={15} />
-                {model === v5.version ? "Reported evaluation" : "Demo evaluation ready"}
+                {model === v5.version ? "Reported evaluation" : "Historical version"}
               </div>
               {(model === v5.version
                 ? [
                     ["Completion rate", `${v5.evaluation.completionRate}%`],
                     ["Mean reward", String(v5.evaluation.meanReward)],
                     ["Evaluation episodes", String(v5.evaluation.episodes)],
-                    ["Evaluation seed", String(v5.evaluation.seed)],
+                    ["Evaluation seed", v5.evaluation.seed.toLocaleString()],
                   ]
                 : [
-                    ["Completion rate", model === "PPO v2" ? "27.5%" : "42.0%"],
-                    ["Average reward", model === "PPO v2" ? "24.6" : "8.1"],
-                    ["Average makespan", model === "PPO v2" ? "47.4s" : "45.2s"],
-                    ["Evaluation episodes", "10 (demo)"],
+                    [
+                      "Completion rate",
+                      model === "PPO v2" ? "27.5% (historical comparison)" : "Not provided",
+                    ],
+                    ["Average reward", "Not provided"],
+                    [
+                      "Average makespan",
+                      model === "PPO v2" ? "47.4s (historical comparison)" : "Not provided",
+                    ],
                   ]
               ).map(([label, value]) => (
                 <div key={label} className="flex justify-between">
@@ -310,8 +318,8 @@ function PPO() {
               ))}
               <p className="border-t pt-4 text-[10px] leading-5 text-muted-foreground">
                 {model === v5.version
-                  ? `Reported results from the ${v5.version} evaluation run (${v5.evaluation.episodes} episodes, seed ${v5.evaluation.seed}). Not computed in the browser.`
-                  : "Historical version. PPO v2 completion and makespan use historical averages; remaining values are illustrative demo data."}
+                  ? `Reported results from the ${v5.version} evaluation run (${v5.evaluation.episodes} episodes, seed ${v5.evaluation.seed.toLocaleString()}). Not computed in the browser.`
+                  : "Historical version. Only PPO v2 completion and makespan from the historical comparison are available; no other evaluation figures were recorded."}
               </p>
             </div>
           ) : (

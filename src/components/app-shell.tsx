@@ -82,11 +82,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <item.icon />
                 <span className={collapsed ? "md:hidden" : ""}>{item.name}</span>
-                {item.name === "PPO Model" && !collapsed && (
-                  <span className="ml-auto rounded bg-violet/10 px-1.5 py-0.5 font-mono text-[8px] text-violet">
-                    v2
-                  </span>
-                )}
               </Link>
             </div>
           ))}
